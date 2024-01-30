@@ -1,8 +1,8 @@
-import express from "express";
-import multer from "multer";
-import path from "path";
-import * as product from "../controllers/product.js";
-import { requireSignin } from "../middlewares/auth.js";
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const product = require("../controllers/product");
+const { requireSignin } = require("../middlewares/auth");
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -18,12 +18,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/addProduct", upload.single("image"), product.adđProduct);
+router.post("/addProduct", upload.single("image"), product.addProduct); // Fixed typo in "addProduct"
 
 router.get("/list", product.getLists);
-router.put("/update/:productId", requireSignin,multer().none(), product.updateProduct);
+router.put("/update/:productId", requireSignin, multer().none(), product.updateProduct);
 
 router.delete("/delete/:productId", requireSignin, product.deleteProduct);
 
 router.get("/getProduct/:productId", product.getProduct);
-export default router;
+
+module.exports = router;

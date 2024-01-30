@@ -1,22 +1,18 @@
-import * as config from "../config.js";
-import User from "../models/auth.js";
-import { nanoid } from "nanoid";
-import jwt from "jsonwebtoken";
-import { hashPassword, comparePassword } from "../helpers/auth.js";
+const config = require("../config");
+const User = require("../models/auth");
+const { nanoid } = require("nanoid");
+const jwt = require('jsonwebtoken');
+const { hashPassword, comparePassword } = require("../helpers/auth");
 
-export const tokenAndUserResponse = (req, res, user) => {
-  // create token
+const tokenAndUserResponse = (req, res, user) => {
   const jwtToken = jwt.sign({ _id: user._id }, config.JWT_SECRET, {
     expiresIn: "1d",
   });
-  // create refresh token
   const refreshToken = jwt.sign({ _id: user._id }, config.JWT_SECRET, {
     expiresIn: "30d",
   });
-  // hide fields
   user.password = undefined;
   user.resetCode = undefined;
-  // send response
   return res.json({
     user,
     token: jwtToken,
@@ -25,12 +21,9 @@ export const tokenAndUserResponse = (req, res, user) => {
   });
 };
 
-export const register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const { email, password, role } = req.body;
-
-    console.log("check mail and password", email, password);
-
     const userExist = await User.findOne({ email });
     if (userExist) {
       return res.status(400).json({ error: "Email is already registered" });
@@ -40,7 +33,6 @@ export const register = async (req, res) => {
         error: "Password should be at least 6 characters long",
       });
     }
-
     const hashedPassword = await hashPassword(password);
     const newUser = new User({
       username: nanoid(6),
@@ -48,9 +40,7 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role
     });
-
     await newUser.save();
-
     tokenAndUserResponse(req, res, newUser);
   } catch (error) {
     console.log(error);
@@ -58,16 +48,13 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    //check email
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.json({ error: "not found email ! Register first !" });
     }
-    //compare password
     const match = await comparePassword(password, user.password);
     if (!match) {
       return res.json({ error: "password is wrong" });
@@ -79,13 +66,11 @@ export const login = async (req, res) => {
   }
 };
 
-export const currentUser = async (req, res) => {
+const currentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     user.password = undefined;
     user.resetCode = undefined;
-    console.log("===> ", user);
-    // res.json(user);
     return res.json({
       user,
       role: user.role[0],
@@ -95,3 +80,5 @@ export const currentUser = async (req, res) => {
     return res.status(403).json({ error: "Unauthorized" });
   }
 };
+
+module.exports = { tokenAndUserResponse, register, login, currentUser };

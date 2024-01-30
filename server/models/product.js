@@ -1,12 +1,11 @@
+const mongoose = require('mongoose');
 
-import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema({
   name: String,
   image: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Image'
   },
-  
   price: Number,
   description: String,
   createdAt: {
@@ -21,4 +20,4 @@ const productSchema = new mongoose.Schema({
 
 const product = mongoose.model('product', productSchema);
 
-export default product;
+module.exports = product;

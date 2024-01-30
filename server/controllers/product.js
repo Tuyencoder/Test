@@ -1,17 +1,17 @@
-import Product from "../models/product.js";
-import Image from "../models/image.js";
+const Product = require("../models/product"); // Assuming product.js exports a Product model as default
+const Image = require("../models/image"); // Assuming image.js exports an Image model as default
 
-export const getLists = async (req, res) => {
+const getLists = async (req, res) => {
   try {
-    // Course.find({})
-    const course = await Product.find({}).populate("image");
-    return res.json(course);
+    const products = await Product.find({}).populate("image");
+    return res.json(products);
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-export const adđProduct = async (req, res) => {
+const addProduct = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).send("No image file uploaded.");
@@ -36,69 +36,66 @@ export const adđProduct = async (req, res) => {
     });
     await product.save();
 
-    res.send("product created and with image.");
+    res.send("Product created with image.");
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(500).send("Server error");
   }
 };
-export const updateProduct = async (req, res) => {
-  const productId = req.params.productId;
-  console.log("idProduct: ", productId);
-  console.log("body", req.body);
-  const { userID, name, description, price } = req.body;
-  console.log(req.body.name);
+
+const updateProduct = async (req, res) => {
+  const { productId } = req.params;
+  const { name, description, price } = req.body;
 
   try {
-    const updateProduct = await Product.findByIdAndUpdate(productId, {
+    const updatedProduct = await Product.findByIdAndUpdate(productId, {
       name,
       description,
       price: parseInt(price),
-    });
+    }, { new: true });
 
-    console.log("productId", updateProduct);
-    return (
-      res
-        // .json("updateCourse",updateCourse)
-        .status(200)
-        .json({ message: "Update successfully" })
-    );
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Update successfully", product: updatedProduct });
   } catch (error) {
     console.log(error);
-    return res.status(500).json(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
-export const deleteProduct = async (req, res) => {
+
+const deleteProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-
-    // Kiểm tra xem sản phẩm có tồn tại không
     const existingProduct = await Product.findById(productId);
 
     if (!existingProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Xóa sản phẩm dựa trên _id của sản phẩm
     await Product.findByIdAndDelete(productId);
-
-    return res.status(200).json({ message: "Product removed successfully" });
+    res.status(200).json({ message: "Product removed successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-export const getProduct = async (req, res) => {
+const getProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-    const product = await Product.findOne({ _id: productId }).populate("image");
-    // console.log(course.image.filename);
-    // console.log(course)
-    product.toObject();
-    // console.log(course)
-    return res.json(product);
+    const product = await Product.findById(productId).populate("image");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+module.exports = { getLists, addProduct, updateProduct, deleteProduct, getProduct };

@@ -26,7 +26,7 @@ const Header = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
-            {auth.user ? (
+            {auth.role ==="Buyer" ? (
               <>
                 <Nav>
                   <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
@@ -35,6 +35,7 @@ const Header = () => {
             ) : auth.role === "Admin" ? (
               <>
                 <Nav.Link href="/admin/dashboard">Admin</Nav.Link>
+                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
               </>
             ) : (
               <>

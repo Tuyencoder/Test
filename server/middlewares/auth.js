@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config.js'
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config');
 
-export const requireSignin = (req, res, next) =>{
+const requireSignin = (req, res, next) =>{
     try {
         const decoded = jwt.verify(req.headers.authorization, JWT_SECRET);
         req.user = decoded;
@@ -11,3 +11,5 @@ export const requireSignin = (req, res, next) =>{
         res.status(401).json({error: 'Invalid or expired token'});
     }
 }
+
+module.exports = { requireSignin };

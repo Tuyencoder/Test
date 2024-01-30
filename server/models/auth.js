@@ -1,22 +1,23 @@
-import { model,Schema,ObjectId } from "mongoose";
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+// ObjectId can be accessed via Schema if needed, but it's not used in this snippet.
+
 const schema = new Schema({
-    //
-    username:{
+    username: {
         type: String,
         trim: true,
         unique: true,
-        require: true,
+        required: true, // It should be 'required' instead of 'require'
         lowercase: true,
     },
-    email:{
+    email: {
         type: String,
         trim: true,
         unique: true,
-        require: true,
+        required: true,
         lowercase: true,
     },
-    password:{
+    password: {
         type: String,
         required: true,
         maxlength: 255,
@@ -24,11 +25,13 @@ const schema = new Schema({
     role: {
         type: [String],
         default: ["Buyer"],
-        enum: ["Buyer", "Seller","Admin"],
+        enum: ["Buyer", "Seller", "Admin"],
     },
-    // resetCode: { type: String, default: ""},
-},
-    {timestamps: true}
-);
+    // resetCode: { type: String, default: "" }, // Uncomment if resetCode is needed
+}, {
+    timestamps: true
+});
+
 const User = mongoose.model('User', schema);
-export default User;
+
+module.exports = User;  // Exporting the User model for use in other parts of the application

@@ -1,38 +1,37 @@
-import express from "express";
-import morgan from "morgan";
-import cors from "cors";
-import { Database } from "./config.js";
-import mongoose from "mongoose";
-import authRoutes from "./routes/auth.js";
-import productRoutes from "./routes/product.js";
-import path from 'path';
-import { fileURLToPath } from 'url';
+const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
+const { Database } = require("./config");
+const mongoose = require("mongoose");
+const authRoutes = require("./routes/auth");
+const productRoutes = require("./routes/product");
+const path = require('path');
+const { fileURLToPath } = require('url');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Adjusting for the lack of import.meta.url in CommonJS, using __dirname and __filename directly
 const app = express();
 
-//
-// app.use(express.static(path.join(__dirname,'public')));
+// Serving static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
 
+// Endpoint to serve images from 'public/image' directory
 app.get("/image/:imageName", (req, res) => {
   const imageName = req.params.imageName;
   res.sendFile(path.join(__dirname, `public/image/${imageName}`));
 });
-//connect db
+
+// Connect to the database
 mongoose
   .connect(Database)
   .then(() => console.log("connect db successfully"))
   .catch((err) => console.log(err));
 
-//middleware
+// Middleware
 app.use(express.json());
 app.use(morgan("dev"));
 
-//cors
+// CORS configuration
 const whitelist = ["http://localhost:3000", "https://sandbox.vnpayment.vn"];
-
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
@@ -42,12 +41,11 @@ const corsOptions = {
     }
   },
 };
-
 app.use(cors(corsOptions));
 
-//route
+// Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/product", productRoutes);
-// app.use("/api", adRoutes);
 
+// Start the server
 app.listen(8000, () => console.log("listening on port: 8000"));

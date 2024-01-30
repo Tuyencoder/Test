@@ -1,12 +1,12 @@
-import express from 'express';
-import * as auth from '../controllers/auth.js';
-import { requireSignin } from '../middlewares/auth.js';
+const express = require('express');
+const auth = require('../controllers/auth');
+const { requireSignin } = require('../middlewares/auth');
 const router = express.Router();
 
-router.post('/register', auth.register)
+router.post('/register', auth.register);
 
-router.post('/login', auth.login)
+router.post('/login', auth.login);
 
-router.get("/current-user", requireSignin, auth.currentUser);
+router.get('/current-user', requireSignin, auth.currentUser);
 
-export default router; 
+module.exports = router;
